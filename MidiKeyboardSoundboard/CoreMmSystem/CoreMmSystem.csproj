@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{D776C41E-EA42-4538-A442-85F80BB5341B}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>PureMidi.CoreMmSystem</RootNamespace>
+    <AssemblyName>PureMidi.CoreMmSystem</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="MidiIO\Definitions\EShortMessageType.cs" />
+    <Compile Include="MidiIO\DeviceInfo\MidiInCaps.cs" />
+    <Compile Include="MidiIO\Exceptions\DeviceException.cs" />
+    <Compile Include="ErrorEventArgs.cs" />
+    <Compile Include="MidiIO\Definitions\ControllerType.cs" />
+    <Compile Include="MidiIO\Definitions\EMidiDeviceTechnology.cs" />
+    <Compile Include="MidiIO\Definitions\EMidiPortStatus.cs" />
+    <Compile Include="MidiIO\Definitions\EMidiEventType.cs" />
+    <Compile Include="MidiIO\Exceptions\EDeviceException.cs" />
+    <Compile Include="MidiIO\InputDevice.cs" />
+    <Compile Include="MidiIO\Exceptions\InputDeviceException.cs" />
+    <Compile Include="MidiIO\MidiDevice.cs" />
+    <Compile Include="MidiIO\Exceptions\MidiDeviceException.cs" />
+    <Compile Include="MidiIO\DeviceInfo\MidiDeviceInfo.cs" />
+    <Compile Include="MidiIO\Data\MidiEvent.cs" />
+    <Compile Include="MidiIO\Data\MidiHeader.cs" />
+    <Compile Include="MidiIO\Data\MidiHeaderBuilder.cs" />
+    <Compile Include="MidiIO\DeviceInfo\MidiInInfo.cs" />
+    <Compile Include="MidiIO\DeviceInfo\MidiOutInfo.cs" />
+    <Compile Include="MidiIO\MidiMessageEvent.cs" />
+    <Compile Include="MidiIO\OutputDevice.cs" />
+    <Compile Include="MidiIO\Exceptions\OutputDeviceException.cs" />
+    <Compile Include="MidiIO\DeviceInfo\MidiOutCaps.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WindowsMultimediaDevice.cs" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
