@@ -7,8 +7,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiKeyboardSoundboard", "M
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMmSystem", "MidiKeyboardSoundboard\CoreMmSystem\CoreMmSystem.csproj", "{D776C41E-EA42-4538-A442-85F80BB5341B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sequencing", "MidiKeyboardSoundboard\Sequencing\Sequencing.csproj", "{BAFC9015-AF2E-4EF6-BB5B-03D67389D131}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{D776C41E-EA42-4538-A442-85F80BB5341B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D776C41E-EA42-4538-A442-85F80BB5341B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D776C41E-EA42-4538-A442-85F80BB5341B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BAFC9015-AF2E-4EF6-BB5B-03D67389D131}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BAFC9015-AF2E-4EF6-BB5B-03D67389D131}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BAFC9015-AF2E-4EF6-BB5B-03D67389D131}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BAFC9015-AF2E-4EF6-BB5B-03D67389D131}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

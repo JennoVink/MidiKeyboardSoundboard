@@ -69,6 +69,8 @@
                     </Style>
                 </Button.Style>
             </Button>
+            <CheckBox Content="Enable autosensing support" ToolTip="When the recording button directly stops right after clicking, enabling this feature might help"
+                      IsChecked="{Binding IgnoreAutoSensingSignals}" Margin="4, 15, 4, 0"/>
         </DockPanel>
 
         <ScrollViewer Grid.Column="0" Grid.Row="1" IsEnabled="{Binding IsConnected}" Margin="4">

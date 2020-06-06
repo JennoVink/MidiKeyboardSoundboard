@@ -146,6 +146,7 @@ namespace MidiKeyboardSoundboard.ViewModel
         // index 'volume': recording of a volume knob
         public Dictionary<string, bool> IsRecording { get; set; }
 
+        public bool IgnoreAutoSensingSignals { get; set; }
 
         public ObservableCollection<MidiInInfo> InputDevices { get; set; } = new ObservableCollection<MidiInInfo>();
 
@@ -200,12 +201,16 @@ namespace MidiKeyboardSoundboard.ViewModel
         {
             if (ev.MidiEventType == EMidiEventType.Short)
             {
-                Console.WriteLine(ev.Hex + "|  "
+                Console.WriteLine(ev.Hex + " |  "
                                          + ev.Status.ToString("X2").ToUpper() + "  |  " +
                                          (ev.Status & 0xF0).ToString("X2").ToUpper() + " | " +
                                          ((ev.Status & 0x0F) + 1).ToString("X2").ToUpper() + " |  " +
                                          ev.AllData[1].ToString("X2").ToUpper() + "   |  " +
                                          ev.AllData[2].ToString("X2").ToUpper() + "   | ");
+
+                // ignore autosensing
+                if (ev.Hex == "FE0000" && IgnoreAutoSensingSignals)
+                    return;
 
                 if (IsRecording["volume"])
                 {
@@ -216,7 +221,7 @@ namespace MidiKeyboardSoundboard.ViewModel
                 if (IsRecording["stop"])
                 {
                     SpecialButtons["stop"] = ev.AllData[1].ToString("X2");
-                    Debug.WriteLine($"Stop button recording ended {ev.AllData[1].ToString("X2")}");
+                    Debug.WriteLine($"Stop button recording ended {ev.AllData[1]:X2}");
 
                     IsRecording["stop"] = false;
                     RaisePropertyChanged(nameof(IsRecording));
@@ -224,7 +229,7 @@ namespace MidiKeyboardSoundboard.ViewModel
                 else if (IsRecording["sound"])
                 {
                     IsRecording["sound"] = false;
-                    Debug.WriteLine($"recording ended {ev.AllData[1].ToString("X2")}");
+                    Debug.WriteLine($"recording ended {ev.AllData[1]:X2}");
 
                     SoundEntries.First(x => x.Id == RecordingForSoundEntryId).KeyId = ev.AllData[1].ToString("X2");
 
@@ -244,7 +249,6 @@ namespace MidiKeyboardSoundboard.ViewModel
                 }
                 else if (ev.AllData[1].ToString("X2") == SpecialButtons["volume"])
                 {
-                    //Console.WriteLine(int.Parse(ev.AllData[2].ToString()) / 127.0 * 100);
                     SetVolume((int)(int.Parse(ev.AllData[2].ToString()) / 127.0 * 100));
                 }
             }
