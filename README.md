@@ -1,4 +1,4 @@
-# Midi Keyboard Soundboard (also known as: Arjan Lubach soundboard, zondag met Lubach soundboard)
+# Midi Keyboard Soundboard (also known as: Arjen Lubach soundboard, zondag met Lubach soundboard)
 Simple WPF desktop app that configures a midi keyboard (or midi pad controller) to be a soundboard. Tested with an AKAI LPD 8.
 
 Feel free to raise issues or create pull requests.
