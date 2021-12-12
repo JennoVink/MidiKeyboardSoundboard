@@ -8,3 +8,15 @@ The motivation for me to create this project is that I couldn't find any softwar
 
 ## Download
 See https://github.com/JennoVink/MidiKeyboardSoundboard/releases
+
+## Play sounds through the microphone
+- Install [VBCable](https://vb-audio.com/Cable/index.htm)
+- Open your sound settings and select "App volume and device preferences"
+- Set the Output device for the Soundboard Application to "CABLE Input"
+- Change your microphone in the application in which you need the soundboard to "CABLE Output"
+
+### Soundboard + voice:
+- Open the Sound Control Panel and go to Recording
+- Select your normal microphone and go to the properties
+- Select lists and activate "Listen to this device"
+- Change the playback device to "CABLE Input"
