@@ -1,4 +1,4 @@
-# Midi Keyboard Soundboard
+# Midi Keyboard Soundboard (also known as: Arjan Lubach soundboard, zondag met lubach soundboard)
 Simple WPF desktop app that configures a midi keyboard (or midi pad controller) to be a soundboard. Tested with an AKAI LPD 8.
 
 Feel free to raise issues or create pull requests.
@@ -9,13 +9,13 @@ The motivation for me to create this project is that I couldn't find any softwar
 ## Download
 See https://github.com/JennoVink/MidiKeyboardSoundboard/releases
 
-## Play sounds through the microphone
+## Use with Discord: play soundboard sounds through the microphone (while streaming) (credits to: @HypedDomi)
 - Install [VBCable](https://vb-audio.com/Cable/index.htm)
 - Open your sound settings and select "App volume and device preferences"
 - Set the Output device for the Soundboard Application to "CABLE Input"
-- Change your microphone in the application in which you need the soundboard to "CABLE Output"
+- Change your microphone in the application you need (e.g. Twitch, discord, etc) to: "CABLE Output"
 
-### Soundboard + voice:
+### Use both soundboard and microphone at once:
 - Open the Sound Control Panel and go to Recording
 - Select your normal microphone and go to the properties
 - Select lists and activate "Listen to this device"
