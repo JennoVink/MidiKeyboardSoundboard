@@ -82,7 +82,10 @@ namespace MidiKeyboardSoundboard.ViewModel
 
         private void SetVolume(int volume)
         {
-            defaultPlaybackDevice.Volume = volume;
+            foreach (var soundEntry in SoundEntries)
+            {
+                soundEntry.SetVolume(volume);
+            }
         }
 
         private void RecordStopButtonCommandExecuted()
@@ -164,9 +167,6 @@ namespace MidiKeyboardSoundboard.ViewModel
                 SaveSettings);
 
         public ICommand RecordVolumeKnobCommand { get; set; }
-
-        readonly CoreAudioDevice defaultPlaybackDevice = new CoreAudioController().DefaultPlaybackDevice;
-
 
         private void OpenConnectionCommandExecuted()
         {
