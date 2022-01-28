@@ -74,7 +74,7 @@
         </DockPanel>
 
         <ScrollViewer Grid.Column="0" Grid.Row="1" IsEnabled="{Binding IsConnected}" Margin="4">
-            <ItemsControl ItemsSource="{Binding SoundEntries}">
+            <ItemsControl ItemsSource="{Binding MidiButtons}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
                         <WrapPanel Orientation="Horizontal"/>
@@ -87,7 +87,7 @@
                                 <TextBlock Text="{Binding SoundPath}" TextAlignment="Center" TextWrapping="WrapWithOverflow"/>
                                 <Button Content="Select Filepath" Command="{Binding ElementName=MainGrid,
                                     Path=DataContext.SelectSoundPathCommand}" CommandParameter="{Binding Id}"/>
-                                <TextBlock Text="{Binding KeyId}" TextAlignment="Center"/>
+                                <TextBlock Text="{Binding MidiKey}" TextAlignment="Center"/>
                                 <Button Command="{Binding ElementName=MainGrid,
                                     Path=DataContext.RecordButtonCommand}" CommandParameter="{Binding Id}">
                                     <Button.Style>
