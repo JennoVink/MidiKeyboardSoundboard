@@ -47,5 +47,17 @@ namespace MidiKeyboardSoundboard.ViewModel
             });
         }
 
+        /// <summary>
+        /// Note that the volume has to be between 0 and 100.
+        /// </summary>
+        /// <param name="volume"></param>
+        public void SetVolume(int volume)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Player.Volume = volume / 100.0f;
+            });
+        }
+
     }
 }
