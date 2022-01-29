@@ -6,12 +6,10 @@ using PureMidi.CoreMmSystem.MidiIO.Data;
 using PureMidi.CoreMmSystem.MidiIO.Definitions;
 using PureMidi.CoreMmSystem.MidiIO.DeviceInfo;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Security.Policy;
 using System.Windows;
 using System.Windows.Input;
 using MidiKeyboardSoundboard.Model;
@@ -25,10 +23,18 @@ namespace MidiKeyboardSoundboard.ViewModel
     public class MidiButton : SoundEntry
     {
         public int Id { get; set; }
+
+        [JsonIgnore]
         public bool IsRecording { get; set; }
         public string MidiKey { get; set; }
 
-        public readonly string name;
+
+        /// <summary>
+        /// Standard buttons (volume knobs, stop button) are hidden by default.
+        /// </summary>
+        public bool IsHidden { get; set; }
+
+        public string Name { get; set; }
 
         public MidiButton()
         {
@@ -38,10 +44,11 @@ namespace MidiKeyboardSoundboard.ViewModel
         {
         }
 
-        public MidiButton(string name, string midiKey = "")
+        public MidiButton(string name, string midiKey = "", bool isHidden = false)
         {
-            this.name = name;
+            this.Name = name;
             MidiKey = midiKey;
+            IsHidden = isHidden;
         }
     }
 
@@ -63,6 +70,32 @@ namespace MidiKeyboardSoundboard.ViewModel
 
         public bool IsConnected { get; set; }
 
+        public MidiButtonCollection MidiButtons { get; set; }
+
+        public int RecordingForSoundEntryId { get; set; } = -1;
+
+        public ICommand OpenConnectionCommand { get; set; }
+        public RelayCommand<string> SelectSoundPathCommand { get; set; }
+        public RelayCommand<string> RecordButtonCommand { get; set; }
+        public RelayCommand<string> RemoveSoundCommand { get; set; }
+        public ICommand AddNewKeyCommand { get; set; }
+        public ICommand RecordStopButtonCommand { get; set; }
+
+
+        public bool IgnoreAutoSensingSignals { get; set; }
+
+        public ObservableCollection<MidiInInfo> InputDevices { get; set; } = new ObservableCollection<MidiInInfo>();
+
+        public MidiInInfo SelectedInputDevice { get; set; }
+
+
+        public ICommand WindowClosing => new RelayCommand<CancelEventArgs>(SaveSettings);
+
+        public ICommand RecordVolumeKnobCommand { get; set; }
+
+        readonly CoreAudioDevice _defaultPlaybackDevice = new CoreAudioController().DefaultPlaybackDevice;
+
+
 
         /// <summary>
         /// Initializes a new instance of the MainViewModel class.
@@ -70,8 +103,6 @@ namespace MidiKeyboardSoundboard.ViewModel
         public MainViewModel()
         {
             Console.WriteLine(Properties.Settings.Default.SoundboardSettings);
-            if (!string.IsNullOrWhiteSpace(Properties.Settings.Default.SoundboardSettings))
-                MidiButtons = JsonConvert.DeserializeObject<MidiButtonCollection>(Properties.Settings.Default.SoundboardSettings);
 
             OpenConnectionCommand = new RelayCommand(OpenConnectionCommandExecuted);
             SelectSoundPathCommand = new RelayCommand<string>(SelectSoundPathCommandExecuted);
@@ -81,50 +112,60 @@ namespace MidiKeyboardSoundboard.ViewModel
             RecordStopButtonCommand = new RelayCommand(RecordStopButtonCommandExecuted);
             RecordVolumeKnobCommand = new RelayCommand(RecordVolumeKnobCommandExecuted);
 
-            // todo: deze midi keys kan je niet verwijderen. Moet ook hidden zijn in de UI. 
             MidiButtons = new MidiButtonCollection
             {
-                new MidiButton("sound"),
-                new MidiButton("stop", "03"),
-                new MidiButton("volume", "02"),
+                new MidiButton("sound", isHidden:true),
+                new MidiButton("stop", "03", true),
+                new MidiButton("volume", "02", true),
             };
 
-            //if (!string.IsNullOrWhiteSpace(Properties.Settings.Default.SpecialButtons))
-            //    SpecialButtons = JsonConvert.DeserializeObject<List<MidiButton>>(Properties.Settings.Default.SpecialButtons);
+            MidiButtons = TryLoadSettings() ?? MidiButtons;
 
             MonitorLoad(this, EventArgs.Empty);
         }
 
-        public MidiButtonCollection MidiButtons { get; set; }
+        private MidiButtonCollection TryLoadSettings()
+        {
+            try
+            {
+                if (!string.IsNullOrWhiteSpace(Properties.Settings.Default.SoundboardSettings))
+                    return JsonConvert.DeserializeObject<MidiButtonCollection>(Properties.Settings.Default.SoundboardSettings);
+            }
+            catch
+            {
+                MessageBox.Show("Loading the soundboard settings failed. This could be because you're using the newest version of the midi keyboard soundboard.");
+                MessageBox.Show("Please raise an issue or comment on my blogpost to let me fix this problem.");
+            }
+
+            return null;
+        }
+
 
         private void RecordVolumeKnobCommandExecuted()
         {
-            MidiButtons.Volume.IsRecording = true;
-            RaisePropertyChanged(nameof(MidiButtons.IsRecording));
+            MidiButtons.VolumeKnob.IsRecording = true;
+            RaisePropertyChanged(nameof(MidiButtons.VolumeKnob.IsRecording));
         }
 
         private void SetVolume(int volume)
         {
-            defaultPlaybackDevice.Volume = volume;
+            _defaultPlaybackDevice.Volume = volume;
         }
 
         private void RecordStopButtonCommandExecuted()
         {
             MidiButtons.StopButton.IsRecording = true;
-            RaisePropertyChanged(nameof(MidiButtons.IsRecording));
+            RaisePropertyChanged(nameof(MidiButtons.StopButton.IsRecording));
         }
 
         private void SaveSettings(CancelEventArgs cancelEventArgs)
         {
-            //todo: latere zorg. eerst func werkend krijgen.
-            //Properties.Settings.Default.SoundboardSettings = JsonConvert.SerializeObject(SoundEntries);
-            //Properties.Settings.Default.SpecialButtons = JsonConvert.SerializeObject(SpecialButtons);
-            //Properties.Settings.Default.Save();
+            Properties.Settings.Default.SoundboardSettings = JsonConvert.SerializeObject(MidiButtons);
+            Properties.Settings.Default.Save();
         }
 
         private void AddNewKeyCommandExecuted()
         {
-            // note: beetje minder dat ik zelf een .max() moet doen om er een toe te voegen.
             MidiButtons.Add(new MidiButton());
         }
 
@@ -152,42 +193,6 @@ namespace MidiKeyboardSoundboard.ViewModel
                 }
             }
         }
-
-        public int RecordingForSoundEntryId { get; set; } = -1;
-
-        public ICommand OpenConnectionCommand { get; set; }
-        public RelayCommand<string> SelectSoundPathCommand { get; set; }
-        public RelayCommand<string> RecordButtonCommand { get; set; }
-        public RelayCommand<string> RemoveSoundCommand { get; set; }
-        public ICommand AddNewKeyCommand { get; set; }
-        public ICommand RecordStopButtonCommand { get; set; }
-
-        // index 'sound': normal recording of a sound button
-        // index 'stop': recording of the stop button
-        // index 'volume': recording of a volume knob
-        //public Dictionary<string, bool> IsRecording { get; set; }
-
-        public bool IgnoreAutoSensingSignals { get; set; }
-
-        public ObservableCollection<MidiInInfo> InputDevices { get; set; } = new ObservableCollection<MidiInInfo>();
-
-        //public ObservableCollection<SoundEntry> SoundEntries => new ObservableCollection<SoundEntry>(this.buttons);
-
-        // buttons like the stop button, set volume knob, etc (depends on what later is added in the future.
-        //public Dictionary<string, string> SpecialButtons { get; set; }
-
-        public MidiInInfo SelectedInputDevice { get; set; }
-
-        //public ICommand WindowClosing => new RelayCommand<CancelEventArgs>(SaveSettings);
-
-        public ICommand WindowClosing =>
-            new RelayCommand<CancelEventArgs>(
-                SaveSettings);
-
-        public ICommand RecordVolumeKnobCommand { get; set; }
-
-        readonly CoreAudioDevice defaultPlaybackDevice = new CoreAudioController().DefaultPlaybackDevice;
-
 
         private void OpenConnectionCommandExecuted()
         {
@@ -234,11 +239,11 @@ namespace MidiKeyboardSoundboard.ViewModel
                     return;
 
                 string pressedMidiKey = ev.AllData[1].ToString("X2");
-                if (MidiButtons.Volume.IsRecording)
+                if (MidiButtons.VolumeKnob.IsRecording)
                 {
-                    MidiButtons.Volume.MidiKey = pressedMidiKey;
-                    MidiButtons.Volume.IsRecording = false;
-                    RaisePropertyChanged(nameof(MidiButtons.IsRecording));
+                    MidiButtons.VolumeKnob.MidiKey = pressedMidiKey;
+                    MidiButtons.VolumeKnob.IsRecording = false;
+                    RaisePropertyChanged(nameof(MidiButtons.VolumeKnob.IsRecording));
                 }
                 if (MidiButtons.StopButton.IsRecording)
                 {
@@ -247,7 +252,7 @@ namespace MidiKeyboardSoundboard.ViewModel
                     Debug.WriteLine($"Stop button recording ended {ev.AllData[1]:X2}");
 
                     MidiButtons.StopButton.IsRecording = false;
-                    RaisePropertyChanged(nameof(MidiButtons.IsRecording));
+                    RaisePropertyChanged(nameof(MidiButtons.StopButton.IsRecording));
                 }
                 else if (MidiButtons.SoundButton.IsRecording)
                 {
@@ -260,7 +265,7 @@ namespace MidiKeyboardSoundboard.ViewModel
                     // In the most optimal solution, the IsRecording["sound"] is also checked in the FE. Unfortunately this gave some problems.
                     // That's why it is set to -1.
                     RecordingForSoundEntryId = -1;
-                    RaisePropertyChanged(nameof(MidiButtons.IsRecording));
+                    RaisePropertyChanged(nameof(MidiButtons.SoundButton.IsRecording));
                 }
                 else if (ev.Status == 144) // pressed button
                 {
@@ -270,7 +275,7 @@ namespace MidiKeyboardSoundboard.ViewModel
                 {
                     StopAllSounds();
                 }
-                else if (pressedMidiKey == MidiButtons.Volume.MidiKey)
+                else if (pressedMidiKey == MidiButtons.VolumeKnob.MidiKey)
                 {
                     SetVolume((int)(int.Parse(ev.AllData[2].ToString()) / 127.0 * 100));
                 }
@@ -282,7 +287,7 @@ namespace MidiKeyboardSoundboard.ViewModel
         {
             MidiButtons.SoundButton.IsRecording = true;
             RecordingForSoundEntryId = int.Parse(soundEntryId);
-            RaisePropertyChanged(nameof(MidiButtons.IsRecording));
+            RaisePropertyChanged(nameof(MidiButtons.SoundButton.IsRecording));
 
             Debug.WriteLine("recording started");
         }
@@ -315,30 +320,6 @@ namespace MidiKeyboardSoundboard.ViewModel
             }
 
             SelectedInputDevice = InputDevices.FirstOrDefault();
-        }
-    }
-
-    public class MidiButtonCollection : ObservableCollection<MidiButton>
-    {
-        /// <summary>
-        /// todo: uitzoeken of dit nog van toepassing is.
-        /// </summary>
-        public bool IsRecording => SoundButton.IsRecording || StopButton.IsRecording || Volume.IsRecording;
-
-        /// <summary>
-        /// can be multiple buttons!
-        /// </summary>
-        public MidiButton SoundButton => this.First(x => x.name == "sound");
-        public MidiButton StopButton => this.First(x => x.name == "stop");
-        public MidiButton Volume => this.First(x => x.name == "volume");
-
-        public new void Add(MidiButton button)
-        {
-            if (Count != 0)
-            {
-                button.Id = this.Max(x => x.Id) + 1;
-            }
-            base.Add(button);
         }
     }
 }

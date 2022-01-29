@@ -7,11 +7,11 @@
         xmlns:command="http://www.galasoft.ch/mvvmlight"
         xmlns:converters="clr-namespace:MidiKeyboardSoundboard.Converters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800" >
+        Title="MainWindow" Height="450" Width="839.6" >
     <Window.Resources>
         <ResourceDictionary>
-            <converters:DictionaryItemConverter x:Key="DictionaryItemConverter" />
             <converters:MultiValueEqualityConverter x:Key="MultiValueEqualityConverter"/>
+            <converters:InverseBooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
         </ResourceDictionary>
     </Window.Resources>
     <i:Interaction.Triggers>
@@ -48,7 +48,7 @@
                     <Style TargetType="Button">
                         <Setter Property="Content" Value="Click to set stop sound button" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsRecording, Converter={StaticResource DictionaryItemConverter}, ConverterParameter=stop}" Value="True">
+                            <DataTrigger Binding="{Binding MidiButtons.StopButton.IsRecording}" Value="True">
                                 <Setter Property="Content" Value="Recording stop button... Press any key." />
                                 <Setter Property="Foreground" Value="Red" />
                             </DataTrigger>
@@ -61,7 +61,7 @@
                     <Style TargetType="Button">
                         <Setter Property="Content" Value="Click to configure the volume knob"/>
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsRecording, Converter={StaticResource DictionaryItemConverter}, ConverterParameter=volume}" Value="True">
+                            <DataTrigger Binding="{Binding MidiButtons.VolumeKnob.IsRecording}" Value="True">
                                 <Setter Property="Foreground" Value="Red" />
                                 <Setter Property="Content" Value="Recording volume knob." />
                             </DataTrigger>
@@ -82,7 +82,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="Black" BorderThickness="2" Padding="2" Margin="2" Width="150" Height="200">
+                        <Border BorderBrush="Black" BorderThickness="2" Padding="2" Margin="2" Width="150" Height="200" Visibility="{Binding IsHidden, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel>
                                 <TextBlock Text="{Binding SoundPath}" TextAlignment="Center" TextWrapping="WrapWithOverflow"/>
                                 <Button Content="Select Filepath" Command="{Binding ElementName=MainGrid,

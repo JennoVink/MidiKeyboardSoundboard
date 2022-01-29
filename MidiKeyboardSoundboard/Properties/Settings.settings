@@ -5,8 +5,5 @@
     <Setting Name="SoundboardSettings" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
-    <Setting Name="SpecialButtons" Type="System.String" Scope="User">
-      <Value Profile="(Default)" />
-    </Setting>
   </Settings>
 </SettingsFile>
