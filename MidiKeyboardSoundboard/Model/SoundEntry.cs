@@ -7,14 +7,10 @@ using Newtonsoft.Json;
 namespace MidiKeyboardSoundboard.Model
 {
     /// <summary>
-    /// An entry representing a sound and a key (on the midi keyboard/pad).
+    ///     An entry representing a sound and a key (on the midi keyboard/pad).
     /// </summary>
     public class SoundEntry : ObservableObject
     {
-        public Uri SoundPath { get; set; }
-
-        [JsonIgnore] public MediaPlayer Player { get; set; }
-
         [JsonConstructor]
         public SoundEntry(Uri soundPath)
         {
@@ -25,6 +21,10 @@ namespace MidiKeyboardSoundboard.Model
         public SoundEntry() : this(new Uri(@"c:\"))
         {
         }
+
+        public Uri SoundPath { get; set; }
+
+        [JsonIgnore] public MediaPlayer Player { get; set; }
 
         public void Play()
         {

@@ -87,7 +87,7 @@
                                 <TextBlock Text="{Binding SoundPath}" TextAlignment="Center" TextWrapping="WrapWithOverflow"/>
                                 <Button Content="Select Filepath" Command="{Binding ElementName=MainGrid,
                                     Path=DataContext.SelectSoundPathCommand}" CommandParameter="{Binding Id}"/>
-                                <TextBlock Text="{Binding MidiKey}" TextAlignment="Center"/>
+                                <TextBlock Text="{Binding MidiKey, StringFormat='Current key: {0}'}" TextAlignment="Center"/>
                                 <Button Command="{Binding ElementName=MainGrid,
                                     Path=DataContext.RecordButtonCommand}" CommandParameter="{Binding Id}">
                                     <Button.Style>
