@@ -25,7 +25,12 @@ namespace PureMidi.CoreMmSystem.MidiIO.Data
             }
         }
 
-        public byte Status { get { return AllData[0]; } }
+        public byte Status => AllData[0];
+
+        /// <summary>
+        /// Returns "pressed", "released" or the status (if not pressed or released).
+        /// </summary>
+        public string PressedOrReleased => Status == 144 ? "pressed" : Status == 128 ? "released" : Status.ToString("X2");
 
         public EMidiEventType MidiEventType
         {

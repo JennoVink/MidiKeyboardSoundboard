@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
-using AudioSwitcher.AudioApi.CoreAudio;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.CommandWpf;
 using Microsoft.Win32;
@@ -33,12 +33,9 @@ namespace MidiKeyboardSoundboard.ViewModel
     /// </summary>
     public class MainViewModel : ViewModelBase
     {
-        private readonly CoreAudioDevice _defaultPlaybackDevice = new CoreAudioController().DefaultPlaybackDevice;
         private InputDevice _inputDevice;
+        private SimpleFileLogger _logger;
 
-        /// <summary>
-        ///     Initializes a new instance of the MainViewModel class.
-        /// </summary>
         public MainViewModel()
         {
             Console.WriteLine(Settings.Default.SoundboardSettings);
@@ -54,6 +51,8 @@ namespace MidiKeyboardSoundboard.ViewModel
             MidiButtons = TryLoadSettings() ?? MidiButtons;
 
             MonitorLoad(this, EventArgs.Empty);
+
+            _logger = new SimpleFileLogger(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
         }
 
         public bool IsConnected { get; set; }
@@ -76,6 +75,7 @@ namespace MidiKeyboardSoundboard.ViewModel
         public MidiInInfo SelectedInputDevice { get; set; }
 
         public ICommand WindowClosing => new RelayCommand<CancelEventArgs>(SaveSettings);
+        public ICommand Keydown => new RelayCommand<KeyEventArgs>(ToggleDebugRecording);
 
         public ICommand RecordVolumeKnobCommand { get; set; }
 
@@ -119,6 +119,15 @@ namespace MidiKeyboardSoundboard.ViewModel
         {
             Settings.Default.SoundboardSettings = JsonConvert.SerializeObject(MidiButtons);
             Settings.Default.Save();
+        }
+
+        private void ToggleDebugRecording(KeyEventArgs keyEventArgs)
+        {
+            if (keyEventArgs.Key == Key.F8)
+            {
+                _logger.ToggleDebugRecording();
+                MessageBox.Show(_logger.ToString());
+            }
         }
 
         private void AddNewKeyCommandExecuted()
@@ -176,6 +185,8 @@ namespace MidiKeyboardSoundboard.ViewModel
         {
             if (ev.MidiEventType == EMidiEventType.Short)
             {
+                _logger?.Log(ev);
+
                 Console.WriteLine(ev.Hex + " |  "
                                          + ev.Status.ToString("X2").ToUpper() + "  |  " +
                                          (ev.Status & 0xF0).ToString("X2").ToUpper() + " | " +
@@ -199,7 +210,7 @@ namespace MidiKeyboardSoundboard.ViewModel
                 {
                     MidiButtons.StopButton.MidiKey = pressedMidiKey;
 
-                    Debug.WriteLine($"Stop button recording ended {ev.AllData[1]:X2}");
+                    _logger?.Log($"Stop button recording ended {ev.AllData[1]:X2}");
 
                     MidiButtons.StopButton.IsRecording = false;
                     RaisePropertyChanged(nameof(MidiButtons.StopButton.IsRecording));
@@ -207,7 +218,7 @@ namespace MidiKeyboardSoundboard.ViewModel
                 else if (MidiButtons.SoundButton.IsRecording)
                 {
                     MidiButtons.SoundButton.IsRecording = false;
-                    Debug.WriteLine($"recording ended {pressedMidiKey}");
+                    _logger?.Log($"recording ended {pressedMidiKey}");
 
                     MidiButtons.First(x => x.Id == RecordingForSoundEntryId).MidiKey = pressedMidiKey;
 
@@ -239,7 +250,7 @@ namespace MidiKeyboardSoundboard.ViewModel
             RecordingForSoundEntryId = int.Parse(soundEntryId);
             RaisePropertyChanged(nameof(MidiButtons.SoundButton.IsRecording));
 
-            Debug.WriteLine("recording started");
+            _logger?.Log("recording started");
         }
 
         private void PlaySound(string midiKeyIndex)

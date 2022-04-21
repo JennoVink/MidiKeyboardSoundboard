@@ -7,7 +7,8 @@
         xmlns:command="http://www.galasoft.ch/mvvmlight"
         xmlns:converters="clr-namespace:MidiKeyboardSoundboard.Converters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="839.6" >
+        Title="MainWindow" Height="450" Width="839.6" 
+        KeyDown="MainWindow_OnKeyDown">
     <Window.Resources>
         <ResourceDictionary>
             <converters:MultiValueEqualityConverter x:Key="MultiValueEqualityConverter"/>

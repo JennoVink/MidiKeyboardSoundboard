@@ -6,9 +6,6 @@ using Newtonsoft.Json;
 
 namespace MidiKeyboardSoundboard.Model
 {
-    /// <summary>
-    ///     An entry representing a sound and a key (on the midi keyboard/pad).
-    /// </summary>
     public class SoundEntry : ObservableObject
     {
         [JsonConstructor]
