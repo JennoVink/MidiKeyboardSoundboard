@@ -38,8 +38,6 @@ namespace MidiKeyboardSoundboard.ViewModel
 
         public MainViewModel()
         {
-            Console.WriteLine(Settings.Default.SoundboardSettings);
-
             OpenConnectionCommand = new RelayCommand(OpenConnectionCommandExecuted);
             SelectSoundPathCommand = new RelayCommand<string>(SelectSoundPathCommandExecuted);
             RecordButtonCommand = new RelayCommand<string>(RecordButtonCommandExecuted);
@@ -57,7 +55,8 @@ namespace MidiKeyboardSoundboard.ViewModel
 
         public bool IsConnected { get; set; }
 
-        public MidiButtonCollection MidiButtons { get; set; }
+        public MidiButtonCollection MidiButtons { get; set; } =
+            new MidiButtonCollection() { new MidiButton("test button", "A1") };
 
         public int RecordingForSoundEntryId { get; set; } = -1;
 
@@ -75,7 +74,7 @@ namespace MidiKeyboardSoundboard.ViewModel
         public MidiInInfo SelectedInputDevice { get; set; }
 
         public ICommand WindowClosing => new RelayCommand<CancelEventArgs>(SaveSettings);
-        public ICommand Keydown => new RelayCommand<KeyEventArgs>(ToggleDebugRecording);
+        public ICommand KeyDown => new RelayCommand<KeyEventArgs>(ToggleDebugRecording);
 
         public ICommand RecordVolumeKnobCommand { get; set; }
 
@@ -126,6 +125,7 @@ namespace MidiKeyboardSoundboard.ViewModel
             if (keyEventArgs.Key == Key.F8)
             {
                 _logger.ToggleDebugRecording();
+                _logger.Log($"Current settings value: {Environment.NewLine}{Settings.Default.SoundboardSettings}");
                 MessageBox.Show(_logger.ToString());
             }
         }
@@ -144,8 +144,7 @@ namespace MidiKeyboardSoundboard.ViewModel
         {
             var dialog = new OpenFileDialog
             {
-                DefaultExt = ".mp3",
-                Filter = "mp3 Files (*.mp3)|*.mp3|WAV Files (*.wav)|*.wav|Midi Files (*.mid)|*.mid",
+                Filter = "music files (*.mp3, *.wav, *.mid)|*.mp3;*.wav;*.mid|mp3 Files (*.mp3)|*.mp3|WAV Files (*.wav)|*.wav|Midi Files (*.mid)|*.mid",
                 Multiselect = true
             };
 
@@ -181,65 +180,65 @@ namespace MidiKeyboardSoundboard.ViewModel
             }
         }
 
+        /// <summary>
+        /// todo: refactor.. All these if statements.
+        /// </summary>
+        /// <param name="ev"></param>
         private void OnMidiEventHandle(MidiEvent ev)
         {
-            if (ev.MidiEventType == EMidiEventType.Short)
+            if (ev.MidiEventType != EMidiEventType.Short) return;
+
+            _logger?.LogDebug(ev);
+
+            // ignore autosensing
+            if (ev.Hex == "FE0000" && IgnoreAutoSensingSignals)
+                return;
+
+            var pressedMidiKey = ev.AllData[1].ToString("X2");
+            if (MidiButtons.VolumeKnob.IsRecording)
             {
-                _logger?.Log(ev);
+                MidiButtons.VolumeKnob.MidiKey = pressedMidiKey;
+                MidiButtons.VolumeKnob.IsRecording = false;
+                RaisePropertyChanged(nameof(MidiButtons.VolumeKnob.IsRecording));
+            }
 
-                Console.WriteLine(ev.Hex + " |  "
-                                         + ev.Status.ToString("X2").ToUpper() + "  |  " +
-                                         (ev.Status & 0xF0).ToString("X2").ToUpper() + " | " +
-                                         ((ev.Status & 0x0F) + 1).ToString("X2").ToUpper() + " |  " +
-                                         ev.AllData[1].ToString("X2").ToUpper() + "   |  " +
-                                         ev.AllData[2].ToString("X2").ToUpper() + "   | ");
+            if (MidiButtons.StopButton.IsRecording)
+            {
+                MidiButtons.StopButton.MidiKey = pressedMidiKey;
 
-                // ignore autosensing
-                if (ev.Hex == "FE0000" && IgnoreAutoSensingSignals)
-                    return;
+                _logger?.Log($"Stop button recording ended {ev.AllData[1]:X2}");
 
-                var pressedMidiKey = ev.AllData[1].ToString("X2");
-                if (MidiButtons.VolumeKnob.IsRecording)
-                {
-                    MidiButtons.VolumeKnob.MidiKey = pressedMidiKey;
-                    MidiButtons.VolumeKnob.IsRecording = false;
-                    RaisePropertyChanged(nameof(MidiButtons.VolumeKnob.IsRecording));
-                }
+                MidiButtons.StopButton.IsRecording = false;
+                RaisePropertyChanged(nameof(MidiButtons.StopButton.IsRecording));
+            }
+            else if (MidiButtons.SoundButton.IsRecording)
+            {
+                MidiButtons.SoundButton.IsRecording = false;
+                _logger?.Log($"recording ended {pressedMidiKey}");
 
-                if (MidiButtons.StopButton.IsRecording)
-                {
-                    MidiButtons.StopButton.MidiKey = pressedMidiKey;
+                MidiButtons.First(x => x.Id == RecordingForSoundEntryId).MidiKey = pressedMidiKey;
 
-                    _logger?.Log($"Stop button recording ended {ev.AllData[1]:X2}");
-
-                    MidiButtons.StopButton.IsRecording = false;
-                    RaisePropertyChanged(nameof(MidiButtons.StopButton.IsRecording));
-                }
-                else if (MidiButtons.SoundButton.IsRecording)
-                {
-                    MidiButtons.SoundButton.IsRecording = false;
-                    _logger?.Log($"recording ended {pressedMidiKey}");
-
-                    MidiButtons.First(x => x.Id == RecordingForSoundEntryId).MidiKey = pressedMidiKey;
-
-                    // The frontend needs a MultiBinding, checking if RecordingForSoundEntryId equal is to the current Id of the SoundEntry.
-                    // In the most optimal solution, the IsRecording["sound"] is also checked in the FE. Unfortunately this gave some problems.
-                    // That's why it is set to -1.
-                    RecordingForSoundEntryId = -1;
-                    RaisePropertyChanged(nameof(MidiButtons.SoundButton.IsRecording));
-                }
-                else if (ev.Status == 144) // pressed button
-                {
-                    PlaySound(pressedMidiKey);
-                }
-                else if (pressedMidiKey == MidiButtons.StopButton.MidiKey)
-                {
-                    StopAllSounds();
-                }
-                else if (pressedMidiKey == MidiButtons.VolumeKnob.MidiKey)
-                {
-                    SetVolume((int)(int.Parse(ev.AllData[2].ToString()) / 127.0 * 100));
-                }
+                // The frontend needs a MultiBinding, checking if RecordingForSoundEntryId equal is to the current Id of the SoundEntry.
+                // In the most optimal solution, the IsRecording["sound"] is also checked in the FE. Unfortunately this gave some problems.
+                // That's why it is set to -1.
+                RecordingForSoundEntryId = -1;
+                RaisePropertyChanged(nameof(MidiButtons.SoundButton.IsRecording));
+            }
+            else if (ev.Status == 144) // pressed button
+            {
+                ButtonPressed(pressedMidiKey);
+            }
+            else if (ev.Status == 128) // released button
+            {
+                ButtonReleased(pressedMidiKey);
+            }
+            else if (pressedMidiKey == MidiButtons.StopButton.MidiKey)
+            {
+                StopAllSounds();
+            }
+            else if (pressedMidiKey == MidiButtons.VolumeKnob.MidiKey)
+            {
+                SetVolume((int)(int.Parse(ev.AllData[2].ToString()) / 127.0 * 100));
             }
         }
 
@@ -253,9 +252,14 @@ namespace MidiKeyboardSoundboard.ViewModel
             _logger?.Log("recording started");
         }
 
-        private void PlaySound(string midiKeyIndex)
+        private void ButtonPressed(string midiKeyIndex)
         {
-            MidiButtons.FirstOrDefault(x => x.MidiKey == midiKeyIndex)?.Play();
+            MidiButtons.FirstOrDefault(x => x.MidiKey == midiKeyIndex)?.ButtonPressed();
+        }
+
+        private void ButtonReleased(string midiKeyIndex)
+        {
+            MidiButtons.FirstOrDefault(x => x.MidiKey == midiKeyIndex)?.ButtonReleased();
         }
 
         private void StopAllSounds()

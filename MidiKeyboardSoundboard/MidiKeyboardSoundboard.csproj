@@ -95,7 +95,7 @@
     <Compile Include="Model\SoundEntry.cs" />
     <Compile Include="Model\MidiButtonCollection.cs" />
     <Compile Include="Model\MidiButton.cs" />
-    <Compile Include="ViewModel\SimpleFileLogger.cs" />
+    <Compile Include="Loggers\SimpleFileLogger.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -142,10 +142,12 @@
       <Project>{D776C41E-EA42-4538-A442-85F80BB5341B}</Project>
       <Name>CoreMmSystem</Name>
     </ProjectReference>
+    <ProjectReference Include="CSharpControls.Wpf\CSharpControls.Wpf.csproj">
+      <Project>{51397e46-744b-4d25-b524-d142d62688bc}</Project>
+      <Name>CSharpControls.Wpf</Name>
+    </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Loggers\" />
-  </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.6.1.1\build\Fody.targets" Condition="Exists('..\packages\Fody.6.1.1\build\Fody.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -1,4 +1,5 @@
 ﻿using System;
+using GalaSoft.MvvmLight;
 using Newtonsoft.Json;
 
 namespace MidiKeyboardSoundboard.Model
@@ -33,6 +34,11 @@ namespace MidiKeyboardSoundboard.Model
 
         public string MidiKey { get; set; } = "(none)";
 
+        /// <summary>
+        /// Press and hold the key for sound. Otherwise, a simple 'tap' is needed to activate the sound.
+        /// </summary>
+        public bool PressAndHold { get; set; }
+
 
         /// <summary>
         ///     Standard buttons (volume knobs, stop button) are hidden by default.
@@ -40,5 +46,19 @@ namespace MidiKeyboardSoundboard.Model
         public bool IsHidden { get; set; }
 
         public string Name { get; set; }
+
+        public void ButtonPressed()
+        {
+            if (LoopSound && IsPlaying)
+                Stop();
+            else
+                Play();
+        }
+
+        public void ButtonReleased()
+        {
+            if (PressAndHold)
+                Stop();
+        }
     }
 }

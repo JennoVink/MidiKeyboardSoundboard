@@ -15,20 +15,7 @@ namespace MidiKeyboardSoundboard.ViewModel
 
         public SimpleFileLogger(string outputFolder)
         {
-            _outputPath = Path.Combine(outputFolder, $"MidiKeyboardDebugLog {DateTime.Now:s-}.log");
-        }
-
-        public void Log(MidiEvent ev)
-        {
-            var note = ev.AllData[1].ToString("X2").ToUpper();
-            Log($"note {note} {ev.PressedOrReleased}");
-        }
-
-        public void Log(string line)
-        {
-            Console.WriteLine(line);
-            if (_isRecording)
-                File.AppendAllText(_outputPath, $"[{DateTime.Now}] {line + Environment.NewLine}");
+            _outputPath = Path.Combine(outputFolder, $"MidiKeyboardDebugLog {DateTime.Now:yy-MM-dd}.log");
         }
 
         /// <summary>
@@ -39,12 +26,24 @@ namespace MidiKeyboardSoundboard.ViewModel
             ? "Debug recording started"
             : $"Debug recording finished! Checkout the file in {_outputPath}";
 
-        /// <summary>
-        /// Although the isRecording could have been a public prop, to ensure good encapsulation this method is introduced.
-        /// </summary>
         public void ToggleDebugRecording()
         {
             _isRecording = !_isRecording;
+            Log(ToString());
+        }
+
+        public void Log(string line)
+        {
+            Console.WriteLine(line);
+            if (_isRecording)
+                File.AppendAllText(_outputPath, $@"[{DateTime.Now:HH:mm:ss.fff}] {line + Environment.NewLine}");
+        }
+
+        public void LogDebug(MidiEvent ev)
+        {
+            var note = ev.AllData[1].ToString("X2").ToUpper();
+            Log($"note {note} {ev.PressedOrReleased}:");
+            Log($"Raw data: {ev.Hex} |  {ev.Status.ToString("X2").ToUpper()}  |  {(ev.Status & 0xF0).ToString("X2").ToUpper()} | {((ev.Status & 0x0F) + 1).ToString("X2").ToUpper()} |  {ev.AllData[1].ToString("X2").ToUpper()}   |  {ev.AllData[2].ToString("X2").ToUpper()}   | ");
         }
     }
 }

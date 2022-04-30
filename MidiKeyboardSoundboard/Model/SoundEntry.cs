@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Media;
 using GalaSoft.MvvmLight;
@@ -8,23 +9,30 @@ namespace MidiKeyboardSoundboard.Model
 {
     public class SoundEntry : ObservableObject
     {
+        public Uri SoundPath { get; set; }
+
+        [JsonIgnore] public string FileName => Path.GetFileName(SoundPath.ToString());
+        [JsonIgnore] public MediaPlayer Player { get; set; }
+        [JsonIgnore] public bool IsPlaying { get; set; }
+
+        public bool LoopSound { get; set; }
+
+
         [JsonConstructor]
         public SoundEntry(Uri soundPath)
         {
             SoundPath = soundPath;
             Player = new MediaPlayer();
+            Player.MediaEnded += Media_Ended;
         }
 
         public SoundEntry() : this(new Uri(@"c:\"))
         {
         }
 
-        public Uri SoundPath { get; set; }
-
-        [JsonIgnore] public MediaPlayer Player { get; set; }
-
         public void Play()
         {
+            IsPlaying = true;
             Application.Current.Dispatcher.Invoke(() =>
             {
                 Player.Open(SoundPath);
@@ -32,8 +40,24 @@ namespace MidiKeyboardSoundboard.Model
             });
         }
 
+        private void Media_Ended(object sender, EventArgs e)
+        {
+            IsPlaying = false;
+
+            if (!LoopSound)
+            {
+                return;
+            }
+
+            IsPlaying = true; // to trigger the flashing animation.
+
+            Player.Position = TimeSpan.Zero;
+            Player.Play();
+        }
+
         public void Stop()
         {
+            IsPlaying = false;
             Application.Current.Dispatcher.Invoke(() => { Player.Stop(); });
         }
 

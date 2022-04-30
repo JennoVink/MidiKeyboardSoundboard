@@ -4,20 +4,39 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:i="http://schemas.microsoft.com/expression/2010/interactivity"
+        xmlns:cc="clr-namespace:CSharpControls.Wpf;assembly=CSharpControls.Wpf"
         xmlns:command="http://www.galasoft.ch/mvvmlight"
         xmlns:converters="clr-namespace:MidiKeyboardSoundboard.Converters"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="839.6" 
-        KeyDown="MainWindow_OnKeyDown">
+        Title="MainWindow" Height="450" Width="839.6">
     <Window.Resources>
         <ResourceDictionary>
             <converters:MultiValueEqualityConverter x:Key="MultiValueEqualityConverter"/>
             <converters:InverseBooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <Style x:Key="LookAtMe" TargetType="StackPanel">
+                <Setter Property="Background" Value="Transparent"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding Path=IsPlaying}" Value="True">
+                        <DataTrigger.EnterActions>
+                            <BeginStoryboard>
+                                <Storyboard>
+                                    <ColorAnimation Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)"
+                                                    From="Green" To="Transparent"
+                                                    BeginTime="0:0:0" Duration="0:0:01"/>
+                                </Storyboard>
+                            </BeginStoryboard>
+                        </DataTrigger.EnterActions>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
         </ResourceDictionary>
     </Window.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
             <command:EventToCommand Command="{Binding DataContext.WindowClosing, ElementName=MainGrid}" PassEventArgsToCommand="True" />
+        </i:EventTrigger>
+        <i:EventTrigger EventName="KeyDown">
+            <command:EventToCommand Command="{Binding DataContext.KeyDown, ElementName=MainGrid}" PassEventArgsToCommand="True" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Grid x:Name="MainGrid" DataContext="{Binding MainViewModel, Source={StaticResource Locator}}">
@@ -47,7 +66,7 @@
             <Button Command="{Binding RecordStopButtonCommand}" Margin="4" IsEnabled="{Binding IsConnected}">
                 <Button.Style>
                     <Style TargetType="Button">
-                        <Setter Property="Content" Value="Click to set stop sound button" />
+                        <Setter Property="Content" Value="{Binding MidiButtons.StopButton.MidiKey, StringFormat=Click to set stop sound button: {0}}" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding MidiButtons.StopButton.IsRecording}" Value="True">
                                 <Setter Property="Content" Value="Recording stop button... Press any key." />
@@ -83,9 +102,9 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="Black" BorderThickness="2" Padding="2" Margin="2" Width="150" Height="200" Visibility="{Binding IsHidden, Converter={StaticResource BooleanToVisibilityConverter}}">
-                            <StackPanel>
-                                <TextBlock Text="{Binding SoundPath}" TextAlignment="Center" TextWrapping="WrapWithOverflow"/>
+                        <Border BorderBrush="Black" BorderThickness="2" Padding="2" Margin="2" Width="175" Height="180" Visibility="{Binding IsHidden, Converter={StaticResource BooleanToVisibilityConverter}}">
+                            <StackPanel Style="{StaticResource LookAtMe}">
+                                <TextBlock Text="{Binding FileName}" TextAlignment="Center" TextWrapping="WrapWithOverflow"/>
                                 <Button Content="Select Filepath" Command="{Binding ElementName=MainGrid,
                                     Path=DataContext.SelectSoundPathCommand}" CommandParameter="{Binding Id}"/>
                                 <TextBlock Text="{Binding MidiKey, StringFormat='Current key: {0}'}" TextAlignment="Center"/>
@@ -109,6 +128,21 @@
                                         </Style>
                                     </Button.Style>
                                 </Button>
+                                <cc:ToggleSwitch  Margin="0,0,1,6"
+                                                  HeaderHorizontalAlignment="Left"
+                                                  SwitchContentPlacement="Right"
+                                                  Content="Loop sound:"
+                                                  CheckedText="Yes" UncheckedText="No"
+                                                  IsChecked="{Binding LoopSound, Mode=TwoWay}"
+                                                  ToolTip="Replay the sound after it's finished">
+                                </cc:ToggleSwitch>
+                                <cc:ToggleSwitch  Margin="0,0,1,6"
+                                                  HeaderHorizontalAlignment="Left"
+                                                  SwitchContentPlacement="Right"
+                                                  Content="Interaction:"
+                                                  CheckedText="Holding" UncheckedText="Tapping"
+                                                  IsChecked="{Binding PressAndHold, Mode=TwoWay}"
+                                                  ToolTip="Tap the button for the sound or play it during holding down the key/button"/>
                                 <Button Command="{Binding Path=DataContext.RemoveSoundCommand, ElementName=MainGrid}" CommandParameter="{Binding Id}" Content="Remove" Foreground="DarkRed" Margin="0, 10, 0, 0"/>
                             </StackPanel>
                         </Border>
@@ -116,7 +150,6 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
-
         <Button Grid.Column="0" Grid.Row="2"  Content="Add new key" Command="{Binding AddNewKeyCommand}" IsEnabled="{Binding IsConnected}" Margin="4"/>
     </Grid>
 </Window>
