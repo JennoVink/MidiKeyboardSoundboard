@@ -89,6 +89,7 @@
     </ApplicationDefinition>
     <Compile Include="Converters\MultiValueEqualityConverter.cs" />
     <Compile Include="Converters\InverseBooleanToVisibilityConverter.cs" />
+    <Compile Include="Model\CustomActionButton.cs" />
     <Compile Include="Model\DefaultButtonFactory.cs" />
     <Compile Include="Properties\Annotations.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />

@@ -46,7 +46,7 @@ namespace MidiKeyboardSoundboard.ViewModel
             RecordStopButtonCommand = new RelayCommand(RecordStopButtonCommandExecuted);
             RecordVolumeKnobCommand = new RelayCommand(RecordVolumeKnobCommandExecuted);
 
-            MidiButtons = TryLoadSettings();
+            MidiButtons = TryLoadSettings() ?? MidiButtons;
             MidiButtons = AddDefaultButtonsIfNeeded(MidiButtons);
 
             MonitorLoad(this, EventArgs.Empty);
@@ -250,7 +250,6 @@ namespace MidiKeyboardSoundboard.ViewModel
             {
                 ButtonReleased(pressedMidiKey);
             }
-
             else if (pressedMidiKey == MidiButtons.VolumeKnob.MidiKey)
             {
                 // refactor ideas: make sure the StopButton/VolumeKnob has an Action type property to execute.
