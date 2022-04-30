@@ -47,7 +47,7 @@ namespace MidiKeyboardSoundboard.Model
 
         public string Name { get; set; }
 
-        public void ButtonPressed()
+        public virtual void ButtonPressed()
         {
             if (LoopSound && IsPlaying)
                 Stop();

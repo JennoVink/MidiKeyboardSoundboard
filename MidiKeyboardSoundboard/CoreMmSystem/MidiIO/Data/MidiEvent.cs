@@ -32,6 +32,9 @@ namespace PureMidi.CoreMmSystem.MidiIO.Data
         /// </summary>
         public string PressedOrReleased => Status == 144 ? "pressed" : Status == 128 ? "released" : Status.ToString("X2");
 
+        public bool ButtonPressed => Status == 144;
+        public bool ButtonReleased => Status == 128;
+
         public EMidiEventType MidiEventType
         {
             get

@@ -34,7 +34,7 @@ namespace MidiKeyboardSoundboard.ViewModel
     public class MainViewModel : ViewModelBase
     {
         private InputDevice _inputDevice;
-        private SimpleFileLogger _logger;
+        private readonly SimpleFileLogger _logger;
 
         public MainViewModel()
         {
@@ -46,11 +46,32 @@ namespace MidiKeyboardSoundboard.ViewModel
             RecordStopButtonCommand = new RelayCommand(RecordStopButtonCommandExecuted);
             RecordVolumeKnobCommand = new RelayCommand(RecordVolumeKnobCommandExecuted);
 
-            MidiButtons = TryLoadSettings() ?? MidiButtons;
+            MidiButtons = TryLoadSettings();
+            MidiButtons = AddDefaultButtonsIfNeeded(MidiButtons);
 
             MonitorLoad(this, EventArgs.Empty);
 
+#if DEBUG
+            SwitchMonitorOn();
+#endif
+
             _logger = new SimpleFileLogger(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments));
+        }
+
+        /// <summary>
+        /// The func to add these default buttons was first in the <see cref="TryLoadSettings"/>, that didn't feel right because the method's name didn't cover its purpose.
+        /// </summary>
+        /// <param name="midiButtons"></param>
+        /// <returns></returns>
+        private MidiButtonCollection AddDefaultButtonsIfNeeded(MidiButtonCollection midiButtons)
+        {
+            if (midiButtons.SoundButton == null)
+            {
+                midiButtons.Add(DefaultButtonFactory.StopButton(StopAllSounds));
+                midiButtons.AddRange(DefaultButtonFactory.SoundAndVolumeButton);
+            }
+
+            return midiButtons;
         }
 
         public bool IsConnected { get; set; }
@@ -84,9 +105,6 @@ namespace MidiKeyboardSoundboard.ViewModel
             {
                 var deserialized = JsonConvert.DeserializeObject<MidiButtonCollection>(Settings.Default
                     .SoundboardSettings);
-
-                if (deserialized.SoundButton == null)
-                    deserialized.AddRange(DefaultButtonFactory.StartStopVolume);
 
                 return deserialized;
             }
@@ -224,24 +242,22 @@ namespace MidiKeyboardSoundboard.ViewModel
                 RecordingForSoundEntryId = -1;
                 RaisePropertyChanged(nameof(MidiButtons.SoundButton.IsRecording));
             }
-            else if (ev.Status == 144) // pressed button
+            else if (ev.ButtonPressed)
             {
                 ButtonPressed(pressedMidiKey);
             }
-            else if (ev.Status == 128) // released button
+            else if (ev.ButtonReleased)
             {
                 ButtonReleased(pressedMidiKey);
             }
-            else if (pressedMidiKey == MidiButtons.StopButton.MidiKey)
-            {
-                StopAllSounds();
-            }
+
             else if (pressedMidiKey == MidiButtons.VolumeKnob.MidiKey)
             {
+                // refactor ideas: make sure the StopButton/VolumeKnob has an Action type property to execute.
+                // or.. Use inheritance to get a StopMidiButton and execute an action.
                 SetVolume((int)(int.Parse(ev.AllData[2].ToString()) / 127.0 * 100));
             }
         }
-
 
         private void RecordButtonCommandExecuted(string soundEntryId)
         {
