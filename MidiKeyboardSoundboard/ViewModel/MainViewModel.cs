@@ -60,14 +60,25 @@ namespace MidiKeyboardSoundboard.ViewModel
 
         /// <summary>
         /// The func to add these default buttons was first in the <see cref="TryLoadSettings"/>, that didn't feel right because the method's name didn't cover its purpose.
+        /// Note that this has build in backward compatability before the stopbutton wasn't a <see cref="CustomActionButton"/>.
         /// </summary>
         /// <param name="midiButtons"></param>
         /// <returns></returns>
         private MidiButtonCollection AddDefaultButtonsIfNeeded(MidiButtonCollection midiButtons)
         {
-            if (midiButtons.SoundButton == null)
+            // for backwards compatibility:
+            if (midiButtons.StopButton.GetType() != typeof(CustomActionButton))
+            {
+                midiButtons.Remove(midiButtons.StopButton);
+            }
+
+            if (midiButtons.StopButton == null)
             {
                 midiButtons.Add(DefaultButtonFactory.StopButton(StopAllSounds));
+            }
+
+            if (midiButtons.SoundButton == null)
+            {
                 midiButtons.AddRange(DefaultButtonFactory.SoundAndVolumeButton);
             }
 
