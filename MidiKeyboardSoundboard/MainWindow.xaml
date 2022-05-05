@@ -16,7 +16,7 @@
             <Style x:Key="LookAtMe" TargetType="StackPanel">
                 <Setter Property="Background" Value="Transparent" />
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding Path=FlashButtonAnimationTimer.Enabled}" Value="True">
+                    <DataTrigger Binding="{Binding Path=ButtonFlashAnimationTimer.Enabled}" Value="True">
                         <DataTrigger.EnterActions>
                             <BeginStoryboard>
                                 <Storyboard>
