@@ -71,7 +71,7 @@
                 <Button.Style>
                     <Style TargetType="Button">
                         <Setter Property="Content"
-                                Value="{Binding MidiButtons.StopButton.MidiKey, StringFormat='Click to set stop sound button: {0}'}" />
+                                Value="Click to set stop sound button" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding MidiButtons.StopButton.IsRecording}" Value="True">
                                 <Setter Property="Content" Value="Recording stop button... Press any key." />
