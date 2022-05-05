@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Linq;
 using System.Windows;
 using System.Windows.Input;
@@ -33,8 +31,33 @@ namespace MidiKeyboardSoundboard.ViewModel
     /// </summary>
     public class MainViewModel : ViewModelBase
     {
-        private InputDevice _inputDevice;
         private readonly SimpleFileLogger _logger;
+        private InputDevice _inputDevice;
+
+        public bool IsConnected { get; set; }
+
+        public MidiButtonCollection MidiButtons { get; set; } =
+            new MidiButtonCollection { new MidiButton("test button", "A1") };
+
+        public int RecordingForSoundEntryId { get; set; } = -1;
+
+        public ICommand OpenConnectionCommand { get; set; }
+        public RelayCommand<string> SelectSoundPathCommand { get; set; }
+        public RelayCommand<string> RecordButtonCommand { get; set; }
+        public RelayCommand<string> RemoveSoundCommand { get; set; }
+        public ICommand AddNewKeyCommand { get; set; }
+        public ICommand RecordStopButtonCommand { get; set; }
+
+        public bool IgnoreAutoSensingSignals { get; set; }
+
+        public ObservableCollection<MidiInInfo> InputDevices { get; set; } = new ObservableCollection<MidiInInfo>();
+
+        public MidiInInfo SelectedInputDevice { get; set; }
+
+        public ICommand WindowClosing => new RelayCommand<CancelEventArgs>(SaveSettings);
+        public ICommand KeyDown => new RelayCommand<KeyEventArgs>(ToggleDebugRecording);
+
+        public ICommand RecordVolumeKnobCommand { get; set; }
 
         public MainViewModel()
         {
@@ -59,8 +82,10 @@ namespace MidiKeyboardSoundboard.ViewModel
         }
 
         /// <summary>
-        /// The func to add these default buttons was first in the <see cref="TryLoadSettings"/>, that didn't feel right because the method's name didn't cover its purpose.
-        /// Note that this has build in backward compatability before the stopbutton wasn't a <see cref="CustomActionButton"/>.
+        ///     The func to add these default buttons was first in the <see cref="TryLoadSettings" />, that didn't feel right
+        ///     because the method's name didn't cover its purpose.
+        ///     Note that this has build in backward compatibility before the stopbutton wasn't a <see cref="CustomActionButton" />
+        ///     .
         /// </summary>
         /// <param name="midiButtons"></param>
         /// <returns></returns>
@@ -68,47 +93,14 @@ namespace MidiKeyboardSoundboard.ViewModel
         {
             // for backwards compatibility:
             if (midiButtons.StopButton.GetType() != typeof(CustomActionButton))
-            {
                 midiButtons.Remove(midiButtons.StopButton);
-            }
 
-            if (midiButtons.StopButton == null)
-            {
-                midiButtons.Add(DefaultButtonFactory.StopButton(StopAllSounds));
-            }
+            if (midiButtons.StopButton == null) midiButtons.Add(DefaultButtonFactory.StopButton(StopAllSounds));
 
-            if (midiButtons.SoundButton == null)
-            {
-                midiButtons.AddRange(DefaultButtonFactory.SoundAndVolumeButton);
-            }
+            if (midiButtons.SoundButton == null) midiButtons.AddRange(DefaultButtonFactory.SoundAndVolumeButton);
 
             return midiButtons;
         }
-
-        public bool IsConnected { get; set; }
-
-        public MidiButtonCollection MidiButtons { get; set; } =
-            new MidiButtonCollection() { new MidiButton("test button", "A1") };
-
-        public int RecordingForSoundEntryId { get; set; } = -1;
-
-        public ICommand OpenConnectionCommand { get; set; }
-        public RelayCommand<string> SelectSoundPathCommand { get; set; }
-        public RelayCommand<string> RecordButtonCommand { get; set; }
-        public RelayCommand<string> RemoveSoundCommand { get; set; }
-        public ICommand AddNewKeyCommand { get; set; }
-        public ICommand RecordStopButtonCommand { get; set; }
-
-        public bool IgnoreAutoSensingSignals { get; set; }
-
-        public ObservableCollection<MidiInInfo> InputDevices { get; set; } = new ObservableCollection<MidiInInfo>();
-
-        public MidiInInfo SelectedInputDevice { get; set; }
-
-        public ICommand WindowClosing => new RelayCommand<CancelEventArgs>(SaveSettings);
-        public ICommand KeyDown => new RelayCommand<KeyEventArgs>(ToggleDebugRecording);
-
-        public ICommand RecordVolumeKnobCommand { get; set; }
 
         private MidiButtonCollection TryLoadSettings()
         {
@@ -131,10 +123,7 @@ namespace MidiKeyboardSoundboard.ViewModel
 
         private void SetVolume(int volume)
         {
-            foreach (var soundEntry in MidiButtons)
-            {
-                soundEntry.SetVolume(volume);
-            }
+            foreach (var soundEntry in MidiButtons) soundEntry.SetVolume(volume);
         }
 
         private void RecordStopButtonCommandExecuted()
@@ -173,7 +162,8 @@ namespace MidiKeyboardSoundboard.ViewModel
         {
             var dialog = new OpenFileDialog
             {
-                Filter = "music files (*.mp3, *.wav, *.mid)|*.mp3;*.wav;*.mid|mp3 Files (*.mp3)|*.mp3|WAV Files (*.wav)|*.wav|Midi Files (*.mid)|*.mid",
+                Filter =
+                    "music files (*.mp3, *.wav, *.mid)|*.mp3;*.wav;*.mid|mp3 Files (*.mp3)|*.mp3|WAV Files (*.wav)|*.wav|Midi Files (*.mid)|*.mid",
                 Multiselect = true
             };
 
@@ -210,7 +200,7 @@ namespace MidiKeyboardSoundboard.ViewModel
         }
 
         /// <summary>
-        /// todo: refactor.. All these if statements.
+        ///     todo: refactor.. All these if statements.
         /// </summary>
         /// <param name="ev"></param>
         private void OnMidiEventHandle(MidiEvent ev)

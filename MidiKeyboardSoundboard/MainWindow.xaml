@@ -11,18 +11,19 @@
         Title="MainWindow" Height="450" Width="839.6">
     <Window.Resources>
         <ResourceDictionary>
-            <converters:MultiValueEqualityConverter x:Key="MultiValueEqualityConverter"/>
+            <converters:MultiValueEqualityConverter x:Key="MultiValueEqualityConverter" />
             <converters:InverseBooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
             <Style x:Key="LookAtMe" TargetType="StackPanel">
-                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="Background" Value="Transparent" />
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding Path=IsPlaying}" Value="True">
+                    <DataTrigger Binding="{Binding Path=FlashButtonAnimationTimer.Enabled}" Value="True">
                         <DataTrigger.EnterActions>
                             <BeginStoryboard>
                                 <Storyboard>
-                                    <ColorAnimation Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)"
-                                                    From="Green" To="Transparent"
-                                                    BeginTime="0:0:0" Duration="0:0:01"/>
+                                    <ColorAnimation
+                                        Storyboard.TargetProperty="(StackPanel.Background).(SolidColorBrush.Color)"
+                                        From="Green" To="Transparent"
+                                        BeginTime="0:0:0" Duration="0:0:01" />
                                 </Storyboard>
                             </BeginStoryboard>
                         </DataTrigger.EnterActions>
@@ -33,10 +34,12 @@
     </Window.Resources>
     <i:Interaction.Triggers>
         <i:EventTrigger EventName="Closing">
-            <command:EventToCommand Command="{Binding DataContext.WindowClosing, ElementName=MainGrid}" PassEventArgsToCommand="True" />
+            <command:EventToCommand Command="{Binding DataContext.WindowClosing, ElementName=MainGrid}"
+                                    PassEventArgsToCommand="True" />
         </i:EventTrigger>
         <i:EventTrigger EventName="KeyDown">
-            <command:EventToCommand Command="{Binding DataContext.KeyDown, ElementName=MainGrid}" PassEventArgsToCommand="True" />
+            <command:EventToCommand Command="{Binding DataContext.KeyDown, ElementName=MainGrid}"
+                                    PassEventArgsToCommand="True" />
         </i:EventTrigger>
     </i:Interaction.Triggers>
     <Grid x:Name="MainGrid" DataContext="{Binding MainViewModel, Source={StaticResource Locator}}">
@@ -44,13 +47,14 @@
             <ColumnDefinition Width="1*" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"/>
-            <RowDefinition Height="10*"/>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="50" />
+            <RowDefinition Height="10*" />
+            <RowDefinition Height="50" />
         </Grid.RowDefinitions>
 
-        <DockPanel  Grid.Column="0" Grid.Row="0" Margin="4">
-            <ComboBox ItemsSource="{Binding InputDevices}" VerticalAlignment="Center" SelectedItem="{Binding SelectedInputDevice}" Margin="4"/>
+        <DockPanel Grid.Column="0" Grid.Row="0" Margin="4">
+            <ComboBox ItemsSource="{Binding InputDevices}" VerticalAlignment="Center"
+                      SelectedItem="{Binding SelectedInputDevice}" Margin="4" />
             <Button Command="{Binding OpenConnectionCommand}" Margin="4">
                 <Button.Style>
                     <Style TargetType="Button">
@@ -66,7 +70,8 @@
             <Button Command="{Binding RecordStopButtonCommand}" Margin="4" IsEnabled="{Binding IsConnected}">
                 <Button.Style>
                     <Style TargetType="Button">
-                        <Setter Property="Content" Value="{Binding MidiButtons.StopButton.MidiKey, StringFormat=Click to set stop sound button: {0}}" />
+                        <Setter Property="Content"
+                                Value="{Binding MidiButtons.StopButton.MidiKey, StringFormat='Click to set stop sound button: {0}'}" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding MidiButtons.StopButton.IsRecording}" Value="True">
                                 <Setter Property="Content" Value="Recording stop button... Press any key." />
@@ -79,7 +84,7 @@
             <Button Command="{Binding RecordVolumeKnobCommand}" Margin="4" IsEnabled="{Binding IsConnected}">
                 <Button.Style>
                     <Style TargetType="Button">
-                        <Setter Property="Content" Value="Click to configure the volume knob"/>
+                        <Setter Property="Content" Value="Click to configure the volume knob" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding MidiButtons.VolumeKnob.IsRecording}" Value="True">
                                 <Setter Property="Foreground" Value="Red" />
@@ -89,67 +94,80 @@
                     </Style>
                 </Button.Style>
             </Button>
-            <CheckBox Content="Enable autosensing support" ToolTip="When the recording button directly stops right after clicking, enabling this feature might help"
-                      IsChecked="{Binding IgnoreAutoSensingSignals}" Margin="4, 15, 4, 0"/>
+            <CheckBox Content="Enable autosensing support"
+                      ToolTip="When the recording button directly stops right after clicking, enabling this feature might help"
+                      IsChecked="{Binding IgnoreAutoSensingSignals}" Margin="4, 15, 4, 0" />
         </DockPanel>
 
         <ScrollViewer Grid.Column="0" Grid.Row="1" IsEnabled="{Binding IsConnected}" Margin="4">
             <ItemsControl ItemsSource="{Binding MidiButtons}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <WrapPanel Orientation="Horizontal"/>
+                        <WrapPanel Orientation="Horizontal" />
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="Black" BorderThickness="2" Padding="2" Margin="2" Width="175" Height="180" Visibility="{Binding IsHidden, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Border BorderBrush="Black" BorderThickness="2" Padding="2" Margin="2" Width="175" Height="180"
+                                Visibility="{Binding IsHidden, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Style="{StaticResource LookAtMe}">
-                                <TextBlock Text="{Binding FileName}" TextAlignment="Center" TextWrapping="WrapWithOverflow"/>
-                                <Button Content="Select Filepath" Command="{Binding ElementName=MainGrid,
-                                    Path=DataContext.SelectSoundPathCommand}" CommandParameter="{Binding Id}"/>
-                                <TextBlock Text="{Binding MidiKey, StringFormat='Current key: {0}'}" TextAlignment="Center"/>
-                                <Button Command="{Binding ElementName=MainGrid,
-                                    Path=DataContext.RecordButtonCommand}" CommandParameter="{Binding Id}">
+                                <TextBlock Text="{Binding FileName}" TextAlignment="Center"
+                                           TextWrapping="WrapWithOverflow" />
+                                <Button Content="Select Filepath"
+                                        Command="{Binding ElementName=MainGrid,
+                                    Path=DataContext.SelectSoundPathCommand}"
+                                        CommandParameter="{Binding Id}" />
+                                <TextBlock Text="{Binding MidiKey, StringFormat='Current key: {0}'}"
+                                           TextAlignment="Center" />
+                                <Button
+                                    Command="{Binding ElementName=MainGrid,
+                                    Path=DataContext.RecordButtonCommand}"
+                                    CommandParameter="{Binding Id}">
                                     <Button.Style>
                                         <Style TargetType="Button">
                                             <Setter Property="Content" Value="Click to attach button" />
                                             <Style.Triggers>
                                                 <DataTrigger Value="True">
                                                     <DataTrigger.Binding>
-                                                        <MultiBinding Converter="{StaticResource MultiValueEqualityConverter}">
-                                                            <Binding ElementName="MainGrid" Path="DataContext.RecordingForSoundEntryId" Mode="OneWay" />
+                                                        <MultiBinding
+                                                            Converter="{StaticResource MultiValueEqualityConverter}">
+                                                            <Binding ElementName="MainGrid"
+                                                                     Path="DataContext.RecordingForSoundEntryId"
+                                                                     Mode="OneWay" />
                                                             <Binding Path="Id" />
                                                         </MultiBinding>
                                                     </DataTrigger.Binding>
-                                                    <Setter Property="Foreground" Value="Red"/>
+                                                    <Setter Property="Foreground" Value="Red" />
                                                     <Setter Property="Content" Value="Recording... Press any key." />
                                                 </DataTrigger>
                                             </Style.Triggers>
                                         </Style>
                                     </Button.Style>
                                 </Button>
-                                <cc:ToggleSwitch  Margin="0,0,1,6"
-                                                  HeaderHorizontalAlignment="Left"
-                                                  SwitchContentPlacement="Right"
-                                                  Content="Loop sound:"
-                                                  CheckedText="Yes" UncheckedText="No"
-                                                  IsChecked="{Binding LoopSound, Mode=TwoWay}"
-                                                  ToolTip="Replay the sound after it's finished">
-                                </cc:ToggleSwitch>
-                                <cc:ToggleSwitch  Margin="0,0,1,6"
-                                                  HeaderHorizontalAlignment="Left"
-                                                  SwitchContentPlacement="Right"
-                                                  Content="Interaction:"
-                                                  CheckedText="Holding" UncheckedText="Tapping"
-                                                  IsChecked="{Binding PressAndHold, Mode=TwoWay}"
-                                                  ToolTip="Tap the button for the sound or play it during holding down the key/button"/>
-                                <Button Command="{Binding Path=DataContext.RemoveSoundCommand, ElementName=MainGrid}" CommandParameter="{Binding Id}" Content="Remove" Foreground="DarkRed" Margin="0, 10, 0, 0"/>
+                                <cc:ToggleSwitch Margin="0,0,1,6"
+                                                 HeaderHorizontalAlignment="Left"
+                                                 SwitchContentPlacement="Right"
+                                                 Content="Loop sound:"
+                                                 CheckedText="Yes" UncheckedText="No"
+                                                 IsChecked="{Binding LoopSound, Mode=TwoWay}"
+                                                 ToolTip="Replay the sound after it's finished" />
+                                <cc:ToggleSwitch Margin="0,0,1,6"
+                                                 HeaderHorizontalAlignment="Left"
+                                                 SwitchContentPlacement="Right"
+                                                 Content="Interaction:"
+                                                 CheckedText="Holding" UncheckedText="Tapping"
+                                                 IsChecked="{Binding PressAndHold, Mode=TwoWay}"
+                                                 ToolTip="Tap the button for the sound or play it during holding down the key/button" />
+                                <Button Command="{Binding Path=DataContext.RemoveSoundCommand, ElementName=MainGrid}"
+                                        CommandParameter="{Binding Id}" Content="Remove" Foreground="DarkRed"
+                                        Margin="0, 10, 0, 0" />
                             </StackPanel>
                         </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
-        <Button Grid.Column="0" Grid.Row="2"  Content="Add new key" Command="{Binding AddNewKeyCommand}" IsEnabled="{Binding IsConnected}" Margin="4"/>
+        <Button Grid.Column="0" Grid.Row="2" Content="Add new key" Command="{Binding AddNewKeyCommand}"
+                IsEnabled="{Binding IsConnected}" Margin="4" />
     </Grid>
 </Window>

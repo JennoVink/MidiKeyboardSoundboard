@@ -17,8 +17,12 @@ namespace MidiKeyboardSoundboard.Model
             new MidiButton("volume", "02", true)
         };
 
-        public static IList<MidiButton> SoundAndVolumeButton => new List<MidiButton> { new MidiButton("sound", isHidden: true), new MidiButton("volume", "02", true) };
+        public static IList<MidiButton> SoundAndVolumeButton => new List<MidiButton>
+            {new MidiButton("sound", isHidden: true), new MidiButton("volume", "02", true)};
 
-        public static MidiButton StopButton(Action action) => new CustomActionButton("stop", "03", true, action);
+        public static MidiButton StopButton(Action action)
+        {
+            return new CustomActionButton("stop", "03", true, action);
+        }
     }
 }

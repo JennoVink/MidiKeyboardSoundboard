@@ -1,5 +1,4 @@
 ﻿using System;
-using GalaSoft.MvvmLight;
 using Newtonsoft.Json;
 
 namespace MidiKeyboardSoundboard.Model
@@ -35,7 +34,7 @@ namespace MidiKeyboardSoundboard.Model
         public string MidiKey { get; set; } = "(none)";
 
         /// <summary>
-        /// Press and hold the key for sound. Otherwise, a simple 'tap' is needed to activate the sound.
+        ///     Press and hold the key for sound. Otherwise, a simple 'tap' is needed to activate the sound.
         /// </summary>
         public bool PressAndHold { get; set; }
 
