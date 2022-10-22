@@ -33,6 +33,7 @@ namespace MidiKeyboardSoundboard.ViewModel
     {
         private readonly SimpleFileLogger _logger;
         private InputDevice _inputDevice;
+        private bool ignoreAutoSensingSignals;
 
         public bool IsConnected { get; set; }
 
@@ -48,7 +49,21 @@ namespace MidiKeyboardSoundboard.ViewModel
         public ICommand AddNewKeyCommand { get; set; }
         public ICommand RecordStopButtonCommand { get; set; }
 
-        public bool IgnoreAutoSensingSignals { get; set; }
+        public bool IgnoreAutoSensingSignals
+        {
+            get => ignoreAutoSensingSignals;
+            set
+            {
+                ignoreAutoSensingSignals = value;
+                if (!value)
+                {
+                    AutosenseNote = string.Empty;
+                }
+            }
+        }
+
+        // todo: this could be a normal button, right...?
+        public string AutosenseNote { get; set; }
 
         public ObservableCollection<MidiInInfo> InputDevices { get; set; } = new ObservableCollection<MidiInInfo>();
 
@@ -205,13 +220,23 @@ namespace MidiKeyboardSoundboard.ViewModel
         /// <param name="ev"></param>
         private void OnMidiEventHandle(MidiEvent ev)
         {
-            if (ev.MidiEventType != EMidiEventType.Short) return;
+            if (ev.MidiEventType != EMidiEventType.Short)
+                return;
 
             _logger?.LogDebug(ev);
 
-            // ignore autosensing
-            if (ev.Hex == "FE0000" && IgnoreAutoSensingSignals)
-                return;
+            // ignore autosensing. Todo: maybe use MidiButtons collection for handling this.
+            if (IgnoreAutoSensingSignals)
+            {
+                if (ev.AllData[1].ToString("X2") == AutosenseNote)
+                    return;
+
+                if (string.IsNullOrEmpty(AutosenseNote))
+                {
+                    AutosenseNote = ev.AllData[1].ToString("X2");
+                    _logger?.Log($"Ignore autosensing is turned on and the following value will be ingored in the future: {AutosenseNote}");
+                }
+            }
 
             var pressedMidiKey = ev.AllData[1].ToString("X2");
             if (MidiButtons.VolumeKnob.IsRecording)
@@ -220,8 +245,7 @@ namespace MidiKeyboardSoundboard.ViewModel
                 MidiButtons.VolumeKnob.IsRecording = false;
                 RaisePropertyChanged(nameof(MidiButtons.VolumeKnob.IsRecording));
             }
-
-            if (MidiButtons.StopButton.IsRecording)
+            else if (MidiButtons.StopButton.IsRecording)
             {
                 MidiButtons.StopButton.MidiKey = pressedMidiKey;
 
