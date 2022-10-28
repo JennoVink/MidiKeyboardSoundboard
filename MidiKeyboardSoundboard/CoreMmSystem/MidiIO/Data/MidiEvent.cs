@@ -55,5 +55,8 @@ namespace PureMidi.CoreMmSystem.MidiIO.Data
             }
         }
 
+        public override string ToString() => $"Raw data: {Hex} |  {Status.ToString("X2").ToUpper()}  |  {(Status & 0xF0).ToString("X2").ToUpper()} | {((Status & 0x0F) + 1).ToString("X2").ToUpper()} |  {AllData[1].ToString("X2").ToUpper()}   |  {AllData[2].ToString("X2").ToUpper()}   | ";
+
+
     }
 }

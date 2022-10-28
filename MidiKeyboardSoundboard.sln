@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreMmSystem", "MidiKeyboar
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpControls.Wpf", "MidiKeyboardSoundboard\CSharpControls.Wpf\CSharpControls.Wpf.csproj", "{51397E46-744B-4D25-B524-D142D62688BC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MidiDeviceMonitor", "MidiDeviceMonitor\MidiDeviceMonitor.csproj", "{029C2436-B7EE-46C6-9B89-17B10A3CEA64}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{51397E46-744B-4D25-B524-D142D62688BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51397E46-744B-4D25-B524-D142D62688BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{51397E46-744B-4D25-B524-D142D62688BC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{029C2436-B7EE-46C6-9B89-17B10A3CEA64}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{029C2436-B7EE-46C6-9B89-17B10A3CEA64}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{029C2436-B7EE-46C6-9B89-17B10A3CEA64}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{029C2436-B7EE-46C6-9B89-17B10A3CEA64}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
