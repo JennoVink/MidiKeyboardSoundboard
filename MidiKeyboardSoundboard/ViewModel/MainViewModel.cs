@@ -107,7 +107,7 @@ namespace MidiKeyboardSoundboard.ViewModel
         private MidiButtonCollection AddDefaultButtonsIfNeeded(MidiButtonCollection midiButtons)
         {
             // for backwards compatibility:
-            if (midiButtons.StopButton.GetType() != typeof(CustomActionButton))
+            if (midiButtons.StopButton?.GetType() != typeof(CustomActionButton))
                 midiButtons.Remove(midiButtons.StopButton);
 
             if (midiButtons.StopButton == null) midiButtons.Add(DefaultButtonFactory.StopButton(StopAllSounds));
