@@ -112,7 +112,7 @@
                                 Visibility="{Binding IsHidden, Converter={StaticResource BooleanToVisibilityConverter}}">
                             <StackPanel Style="{StaticResource LookAtMe}">
                                 <TextBlock Text="{Binding FileName}" TextAlignment="Center"
-                                           TextWrapping="WrapWithOverflow" />
+                                            TextWrapping="NoWrap" TextTrimming="WordEllipsis" ToolTip="{Binding FileName}"  />
                                 <Button Content="Select Filepath"
                                         Command="{Binding ElementName=MainGrid,
                                     Path=DataContext.SelectSoundPathCommand}"
